@@ -1,0 +1,42 @@
+{
+  "started_at": "2026-09-23T23:12:05.586434+00:00",
+  "finished_at": "2026-09-23T23:12:24.670134+00:00",
+  "ok": false,
+  "code_version": "fe70a4f9588c",
+  "model_version": null,
+  "target_day": "2026-09-24",
+  "stages": [
+    {
+      "name": "eia",
+      "ok": true,
+      "seconds": 0.5328578170000355,
+      "detail": {
+        "files_checked": 1,
+        "downloaded": 1,
+        "since": "2026-08-09"
+      },
+      "error": null
+    },
+    {
+      "name": "weather",
+      "ok": true,
+      "seconds": 12.30964229999995,
+      "detail": {
+        "downloaded": 98,
+        "skipped": 0,
+        "quota_stop": false,
+        "remaining": 0
+      },
+      "error": null
+    },
+    {
+      "name": "build",
+      "ok": false,
+      "seconds": 6.226220961999957,
+      "detail": {
+        "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/grid-demand-forecasting/grid-demand-forecasting/src/gridcast/live/daily.py\", line 93, in _stage\n    detail = fn()\n  File \"/home/runner/work/grid-demand-forecasting/grid-demand-forecasting/src/gridcast/live/daily.py\", line 183, in build\n    raise RuntimeError(\"dbt build failed: \" + \"; \".join(r.messages[:5]))\nRuntimeError: dbt build failed: \u001b[0m23:12:24  37 of 53 FAIL 10 min_coverage_int_eia__demand_cleaned_demand_filled_mw__ba_code__0_99  [\u001b[31mFAIL 10\u001b[0m in 0.04s]; \u001b[0m23:12:24  Done. PASS=37 WARN=0 ERROR=1 SKIP=15 NO-OP=0 TOTAL=53\n"
+      },
+      "error": "RuntimeError: dbt build failed: \u001b[0m23:12:24  37 of 53 FAIL 10 min_coverage_int_eia__demand_cleaned_demand_filled_mw__ba_code__0_99  [\u001b[31mFAIL 10\u001b[0m in 0.04s]; \u001b[0m23:12:24  Done. PASS=37 WARN=0 ERROR=1 SKIP=15 NO-OP=0 TOTAL=53"
+    }
+  ]
+}
