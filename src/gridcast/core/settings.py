@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     test: Window = Window(start=date(2024, 7, 1), end=date(2026, 6, 30))
     http_timeout_s: float = 60.0
     open_meteo_requests_per_minute: int = Field(default=300, gt=0)
+    # Live mode (the scheduled GitHub Actions job): forecasting and scoring only. Backtests,
+    # training, ablations and any test-split evaluation are refused (ADR-0009).
+    live_mode: bool = False
+    # Where the live store, model artefact and status live (the `live-data` branch checkout).
+    live_dir: Path | None = None
 
     @model_validator(mode="after")
     def _test_after_validation(self) -> Settings:
@@ -71,6 +76,11 @@ class Settings(BaseSettings):
         return self.data_dir / "warehouse.duckdb"
 
     @property
+    def live_root(self) -> Path:
+        """Root of live artefacts: ``live_dir`` if set, else ``data/live``."""
+        return self.live_dir if self.live_dir is not None else self.data_dir / "live"
+
+    @property
     def reports_dir(self) -> Path:
         """Generated reports and run results."""
         return self.base_dir / "reports"
@@ -85,3 +95,16 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """The process-wide settings (cached; call ``get_settings.cache_clear()`` in tests)."""
     return Settings()
+
+
+class LiveModeError(RuntimeError):
+    """An offline-only action (training, backtests, test evaluation) was attempted live."""
+
+
+def ensure_offline(settings: Settings, action: str) -> None:
+    """Refuse ``action`` when running as the scheduled live job (``GRIDCAST_LIVE_MODE=1``)."""
+    if settings.live_mode:
+        raise LiveModeError(
+            f"{action} is not allowed in live mode: the scheduled job only forecasts and scores "
+            "with the frozen model artefact (ADR-0009)"
+        )

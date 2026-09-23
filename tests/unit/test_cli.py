@@ -22,7 +22,7 @@ def _registered() -> set[str]:
 def test_every_documented_command_is_registered() -> None:
     documented = set()
     for doc in (ROOT / "README.md", ROOT / "CLAUDE.md"):
-        documented |= set(re.findall(r"gridcast ([a-z]+)", doc.read_text()))
+        documented |= set(re.findall(r"gridcast ([a-z][a-z-]*)", doc.read_text()))
     missing = documented - _registered()
     assert not missing, f"documented but not registered: {missing}"
     assert len(documented) >= 8  # the check says how much it checked

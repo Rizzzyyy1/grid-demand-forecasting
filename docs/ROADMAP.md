@@ -13,7 +13,7 @@ first unattended build; everything after needs the owner (accounts, review, cale
 | 5 | N-HiTS, conformal intervals, ablations | stretch | ✅ done (CQR coverage within ±3 pp in all BAs; `reports/ablations/`) |
 | 6 | Daily live loop (Dagster schedules), API, dashboard | stretch | ✅ done (live forecasts stored from 2026-09-24; scoring once actuals publish) |
 | 7 | Monitoring (Evidently), Docker Compose stack verified end-to-end | — | code done; stack verified locally |
-| 8 | Cloud deploy with Terraform, CD | — (needs owner's cloud account) | IaC + release workflow written and `tofu validate`d; **not applied** |
+| 8 | Cloud deploy with Terraform, CD | — | AWS IaC `tofu validate`d, **intentionally not deployed (cost)**; live system on GitHub Actions + Pages (ADR-0009) |
 | 9 | Test-set results, write-up, blog post, demo video | — (needs owner) | ⬜ (test split locked, untouched) |
 
 Note: the full 47-city weather archive costs roughly one day of Open-Meteo's free-tier quota;

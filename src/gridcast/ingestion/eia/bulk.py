@@ -93,10 +93,19 @@ class EiaBulkDownloader:
         self.raw_dir = raw_dir
         self.manifest = Manifest(raw_dir / "manifest.jsonl")
 
-    def sync(self, start_year: int, today: date, force: bool = False) -> SyncReport:
-        """Bring ``raw_dir`` up to date. Safe to re-run; closed files are fetched once."""
+    def sync(
+        self, start_year: int, today: date, force: bool = False, since: date | None = None
+    ) -> SyncReport:
+        """Bring ``raw_dir`` up to date. Safe to re-run; closed files are fetched once.
+
+        ``since`` limits the sync to files whose period ends on or after that day (the live job
+        needs only recent history, not the 0.7 GB archive).
+        """
         report = SyncReport()
-        for f in bulk_files(start_year, today):
+        files = bulk_files(start_year, today)
+        if since is not None:
+            files = [f for f in files if f.period_end >= since]
+        for f in files:
             entry = self.manifest.get(f.filename)
             path = self.raw_dir / f.filename
             if entry and entry.closed and path.exists() and not force:

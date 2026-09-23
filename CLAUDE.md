@@ -19,7 +19,10 @@ make install / make check        # uv sync --all-extras + hooks / ruff + mypy --
 make test-all                    # + slow tests (real dbt build on fixtures, N-HiTS)
 uv run gridcast ingest eia|weather ; gridcast build ; gridcast profile
 uv run gridcast backtest [--models a,b] [--tag x]   # validation split -> reports/runs/<id>/ + MLflow
-uv run gridcast train ; gridcast forecast ; gridcast score ; gridcast drift   # live loop
+uv run gridcast train ; gridcast forecast ; gridcast score ; gridcast drift   # local live loop
+uv run gridcast export-model --out ../gridcast-live-data/model   # then release model-v<N>
+GRIDCAST_LIVE_MODE=1 GRIDCAST_LIVE_DIR=../gridcast-live-data uv run gridcast daily   # = the scheduled job
+uv run gridcast site --out site                   # static dashboard (GitHub Pages)
 python scripts/collect_results.py --readme          # README numbers are generated, never typed
 docker compose up --build        # api :8000, ui :8501, dagster :3000, mlflow :5001
 ```
@@ -43,6 +46,9 @@ docker compose up --build        # api :8000, ui :8501, dagster :3000, mlflow :5
   if in doubt `rm -rf transform/target`.
 * **Use `uv add --no-sync` while long runs are going**: `uv add` re-syncs `.venv` under the
   running processes (it happened to be harmless once; do not rely on that).
+* **In a long-lived process, run dbt as a subprocess** (`run_dbt_subprocess`) if the warehouse is
+  read afterwards: in-process dbt keeps its read-write DuckDB handle and later read-only opens fail.
+  The first local `gridcast daily` failed exactly this way.
 * Host port 5000 is taken by macOS AirPlay; MLflow is published on 5001.
 * LightGBM on macOS needs `brew install libomp`.
 * **LightGBM then PyTorch in one process deadlocks on macOS** (two OpenMP runtimes; PyTorch's

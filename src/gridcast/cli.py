@@ -47,15 +47,23 @@ def regions() -> None:
 @ingest_app.command("eia")
 def ingest_eia(
     force: Annotated[bool, typer.Option(help="Re-download closed periods too")] = False,
+    since: Annotated[
+        str | None, typer.Option(help="Only files covering days on/after YYYY-MM-DD")
+    ] = None,
 ) -> None:
     """Download EIA-930 six-month balance files into data/raw/eia."""
+    from datetime import date as _date  # noqa: PLC0415
+
     from gridcast.ingestion.eia.bulk import EiaBulkDownloader  # noqa: PLC0415
     from gridcast.ingestion.http import make_client  # noqa: PLC0415
 
     settings = get_settings()
     with make_client(settings.http_timeout_s) as client:
         report = EiaBulkDownloader(client, settings.raw_dir / "eia").sync(
-            settings.eia_start_year, utc_now().date(), force=force
+            settings.eia_start_year,
+            utc_now().date(),
+            force=force,
+            since=_date.fromisoformat(since) if since else None,
         )
     console.print(
         f"checked {report.files_checked} files: {len(report.downloaded)} downloaded "
@@ -71,8 +79,11 @@ def ingest_weather(
     daily_budget: Annotated[
         float | None, typer.Option(help="Override the local daily call budget (provider: 10k)")
     ] = None,
+    since: Annotated[str | None, typer.Option(help="Only months from YYYY-MM-DD on")] = None,
 ) -> None:
     """Download Open-Meteo weather (city x month files) into data/raw/weather."""
+    from datetime import date as _date  # noqa: PLC0415
+
     from gridcast.ingestion.http import make_client  # noqa: PLC0415
     from gridcast.ingestion.weather.open_meteo import (  # noqa: PLC0415
         OpenMeteoDownloader,
@@ -85,7 +96,11 @@ def ingest_weather(
             client, settings.raw_dir / "weather", daily_budget=daily_budget
         )
         report = downloader.sync(
-            WeatherKind(kind), all_regions(), settings.weather_start, utc_now().date(), max_chunks
+            WeatherKind(kind),
+            all_regions(),
+            _date.fromisoformat(since) if since else settings.weather_start,
+            utc_now().date(),
+            max_chunks,
         )
     console.print(
         f"{kind}: {report.downloaded} downloaded, {report.skipped} already complete, "
@@ -316,3 +331,75 @@ def combine(
 
     out = combine_runs(get_settings(), run_ids, tag)
     console.print(f"wrote {out}")
+
+
+@app.command("export-model")
+def export_model(
+    out: Annotated[str | None, typer.Option(help="Model directory (default <live>/model)")] = None,
+) -> None:
+    """Export the MLflow `champion` as the portable artefact the scheduled job serves."""
+    from pathlib import Path  # noqa: PLC0415
+
+    import mlflow  # noqa: PLC0415
+
+    from gridcast.core.settings import ensure_offline  # noqa: PLC0415
+    from gridcast.live.artifact import export_artifact  # noqa: PLC0415
+    from gridcast.live.production import (  # noqa: PLC0415
+        ALIAS,
+        MODEL_NAME,
+        load_champion,
+        tracking_uri,
+    )
+
+    settings = get_settings()
+    ensure_offline(settings, "exporting a model")
+    model, version = load_champion(settings)
+    mlflow.set_tracking_uri(tracking_uri(settings))
+    mv = mlflow.MlflowClient().get_model_version_by_alias(MODEL_NAME, ALIAS)
+    params = mlflow.get_run(mv.run_id).data.params if mv.run_id else {}
+    manifest = export_artifact(
+        model,
+        version,
+        Path(out) if out else settings.live_root / "model",
+        train_start=params.get("train_start", "unknown"),
+        last_train_day=params.get("last_train_day", "unknown"),
+    )
+    console.print(f"exported {manifest.file} (sha256 {manifest.sha256[:12]}...)")
+
+
+@app.command()
+def daily() -> None:
+    """Scheduled live run: recent data -> dbt -> forecast -> score -> status (live mode only)."""
+    import os  # noqa: PLC0415
+
+    from gridcast.live.daily import LiveRunError, load_status, run_daily  # noqa: PLC0415
+
+    settings = get_settings()
+    try:
+        run_daily(settings)
+        code = 0
+    except LiveRunError as exc:
+        console.print(f"[red]{exc}[/red]")
+        code = 1
+    status = load_status(settings.live_root)
+    if status and (summary := os.environ.get("GITHUB_STEP_SUMMARY")):
+        from gridcast.live.daily import DailyStatus, StageResult, summary_markdown  # noqa: PLC0415
+
+        stages = [StageResult(**s) for s in status.pop("stages")]
+        with open(summary, "a", encoding="utf-8") as fh:  # noqa: PTH123
+            fh.write(summary_markdown(DailyStatus(**status, stages=stages)))
+    raise typer.Exit(code=code)
+
+
+@app.command()
+def site(
+    out: Annotated[str, typer.Option(help="Output directory")] = "site",
+) -> None:
+    """Build the static public dashboard from the live store and the latest validation run."""
+    from pathlib import Path  # noqa: PLC0415
+
+    from gridcast.site.build import build_site  # noqa: PLC0415
+
+    settings = get_settings()
+    page = build_site(settings.live_root, settings.reports_dir, Path(out))
+    console.print(f"wrote {page}")

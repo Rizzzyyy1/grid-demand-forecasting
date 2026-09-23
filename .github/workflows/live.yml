@@ -1,0 +1,124 @@
+# Daily live forecasting on free GitHub infrastructure (ADR-0009).
+#
+# 12:30 UTC: after the previous day's EIA bulk refresh (~14:40 UTC) and before the earliest issue
+# time (10:00 EDT = 14:00 UTC). The 13:45 run is a retry: issuance is idempotent, so it is a no-op
+# when 12:30 succeeded. Outputs are committed to the `live-data` branch (never to `main`) and the
+# dashboard is deployed to GitHub Pages.
+name: Live
+
+on:
+  schedule:
+    - cron: "30 12 * * *"
+    - cron: "45 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write    # push to live-data, read the model release
+  pages: write
+  id-token: write
+
+concurrency:
+  group: live        # never two runs writing live-data at once
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash      # bash -eo pipefail: a failure inside `... | tee` still fails the step
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      site_built: ${{ steps.site.outcome == 'success' }}
+    env:
+      GRIDCAST_LIVE_MODE: "1"                               # training/backtests/test split refused
+      GRIDCAST_BASE_DIR: ${{ github.workspace }}
+      GRIDCAST_LIVE_DIR: ${{ github.workspace }}/live
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out code (main)
+        uses: actions/checkout@v4
+
+      - name: Check out live data
+        uses: actions/checkout@v4
+        with:
+          ref: live-data
+          path: live
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install (locked; no PyTorch)
+        run: uv sync --frozen --extra ml --extra pipeline
+
+      - name: Fetch and verify the model artefact
+        run: |
+          version=$(jq -r .version live/model/manifest.json)
+          file=$(jq -r .file live/model/manifest.json)
+          gh release download "model-v${version}" --pattern "${file}" --dir live/model --clobber
+          echo "$(jq -r .sha256 live/model/manifest.json)  live/model/${file}" | sha256sum --check
+
+      - name: Daily run (ingest -> dbt -> forecast -> score)
+        id: daily
+        continue-on-error: true   # status and site are still published; the job fails at the end
+        run: uv run --frozen gridcast --json-logs daily 2>&1 | tee live-run.log
+
+      - name: Guard - nothing outside live/ changed
+        run: |
+          git status --porcelain --untracked-files=no -- . ':!live' > changed.txt
+          if [ -s changed.txt ]; then echo "::error::tracked files changed on main:"; cat changed.txt; exit 1; fi
+
+      - name: Commit live data (append-only, verified)
+        if: always() && steps.daily.outcome != 'cancelled'
+        working-directory: live
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          python3 ../scripts/verify_live_commit.py
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          ok=$(jq -r .ok status/latest.json 2>/dev/null || echo unknown)
+          git commit -q -m "live: run for $(jq -r .target_day status/latest.json) (ok=${ok})"
+          for attempt in 1 2 3; do
+            if git push origin live-data; then exit 0; fi
+            sleep $((attempt * 5)); git pull --rebase origin live-data
+          done
+          echo "::error::could not push live-data after 3 attempts"; exit 1
+
+      - name: Build dashboard
+        id: site
+        if: always()
+        run: uv run --frozen gridcast site --out site
+
+      - uses: actions/upload-pages-artifact@v3
+        if: always() && steps.site.outcome == 'success'
+        with:
+          path: site
+
+      - name: Keep logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-run-${{ github.run_id }}
+          path: |
+            live-run.log
+            live/status/latest.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Fail the job if the daily run failed
+        if: steps.daily.outcome == 'failure'
+        run: exit 1
+
+  deploy:
+    needs: run
+    if: always() && needs.run.outputs.site_built == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

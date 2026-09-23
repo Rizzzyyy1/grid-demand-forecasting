@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridCast live</title>
+<meta name="description" content="Day-ahead electricity demand forecasts for ten US grid regions, scored daily against the grid operators' own forecasts.">
+<script src="__PLOTLY__"></script>
+<style>
+:root { --bg:#ffffff; --fg:#1f2328; --muted:#59636e; --card:#f6f8fa; --line:#d1d9e0; --accent:#0969da; --ok:#1a7f37; --bad:#cf222e; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --card:#161b22; --line:#30363d; --accent:#4493f8; --ok:#3fb950; --bad:#f85149; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+main { max-width:1100px; margin:0 auto; padding:24px 16px 64px; }
+h1 { margin:0 0 4px; font-size:28px; } h2 { margin:32px 0 8px; font-size:20px; }
+p.lead, .muted { color:var(--muted); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; margin:12px 0; }
+.badge { display:inline-block; padding:2px 10px; border-radius:999px; font-weight:600; font-size:13px; color:#fff; }
+.badge.ok { background:var(--ok); } .badge.bad { background:var(--bad); }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:right; } th:first-child, td:first-child { text-align:left; }
+.scroll { overflow-x:auto; }
+select { font:inherit; padding:4px 8px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+a { color:var(--accent); }
+#chart, #daily { width:100%; height:380px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>GridCast <span class="badge __BADGE_CLASS__">last run: __BADGE__</span></h1>
+  <p class="lead">Day-ahead hourly electricity-demand forecasts for the ten largest US balancing authorities, issued at 10:00 local the day before and scored against each grid operator's own published forecast. <a href="__REPO__">Source, methods and decisions on GitHub</a>.</p>
+  <div class="card" id="status"></div>
+
+  <h2>Latest issued forecast</h2>
+  <div class="card">
+    <label>Balancing authority <select id="ba"></select></label>
+    <div id="meta" class="muted"></div>
+    <div id="chart"></div>
+  </div>
+
+  <h2>Live track record</h2>
+  <p class="muted" id="trackmeta"></p>
+  <div class="card scroll" id="board"></div>
+  <div class="card"><div id="daily"></div></div>
+
+  <h2>Validation results (frozen, not live)</h2>
+  <p class="muted" id="valmeta"></p>
+  <div class="card scroll" id="val"></div>
+  <p class="muted">Backtest numbers are generated from committed run files and are never mixed into the live record. The 2024-07 → 2026-06 test split is locked and evaluated once; the live record only covers days after it.</p>
+</main>
+<script>
+const D = __DATA__;
+const css = getComputedStyle(document.documentElement);
+const fg = css.getPropertyValue('--fg').trim(), line = css.getPropertyValue('--line').trim();
+const layout = (y) => ({paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:fg}, margin:{l:60,r:10,t:10,b:40}, yaxis:{title:y, gridcolor:line}, xaxis:{gridcolor:line}, legend:{orientation:'h'}});
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (v, d=2) => (v === null || v === undefined || Number.isNaN(v)) ? '—' : Number(v).toFixed(d);
+
+// status
+const st = D.status;
+document.getElementById('status').innerHTML = st
+  ? `Last run started <b>${esc(st.started_at)}</b> · model <b>v${esc(st.model_version ?? '—')}</b> · code <code>${esc(st.code_version)}</code> · target day <b>${esc(st.target_day)}</b><br>` +
+    st.stages.map(s => `${s.ok ? '✅' : '❌'} ${esc(s.name)}${s.error ? ' — ' + esc(s.error) : ''}`).join(' &nbsp; ')
+  : 'No scheduled run has completed yet.';
+
+// latest forecast
+const sel = document.getElementById('ba');
+D.regions.forEach(r => { const o = document.createElement('option'); o.value = r.code; o.textContent = `${r.code} — ${r.name}`; sel.appendChild(o); });
+function drawForecast() {
+  const f = D.latest[sel.value];
+  const meta = document.getElementById('meta');
+  if (!f) { meta.textContent = 'No forecast stored for this region yet.'; Plotly.purge('chart'); return; }
+  meta.innerHTML = `Target day <b>${esc(f.target_day)}</b> · issued ${esc(f.issued_at)} · created ${esc(f.created_at)}${f.late ? ' · <b>LATE</b>' : ''} · model v${esc(f.model_version)}`;
+  const band = (lo, hi, name, color) => [
+    {x:f.t, y:f[hi], mode:'lines', line:{width:0}, showlegend:false, hoverinfo:'skip'},
+    {x:f.t, y:f[lo], mode:'lines', line:{width:0}, fill:'tonexty', fillcolor:color, name}];
+  Plotly.react('chart', [...band('q025','q975','95% interval','rgba(68,147,248,0.15)'), ...band('q10','q90','80% interval','rgba(68,147,248,0.35)'),
+    {x:f.t, y:f.yhat, mode:'lines', name:'forecast', line:{color:'#4493f8', width:2}}], layout('MW'), {responsive:true, displayModeBar:false});
+}
+sel.addEventListener('change', drawForecast); drawForecast();
+
+// track record
+document.getElementById('trackmeta').textContent = D.forecast_days
+  ? `${D.forecast_days} target days issued since ${D.first_day}. Actuals publish about two days after each day, so the newest days are not scored yet.`
+  : 'No live forecasts yet.';
+const lb = D.leaderboard;
+if (lb.length) {
+  const byBa = {}; lb.forEach(r => { (byBa[r.ba_code] ||= {})[r.model] = r; });
+  let h = '<table><tr><th>BA</th><th>days</th><th>GridCast MAPE %</th><th>operator MAPE %</th><th>late hours</th></tr>';
+  Object.keys(byBa).sort().forEach(b => { const o = byBa[b].lgbm_live || {}, p = byBa[b].operator || {};
+    h += `<tr><td>${esc(b)}</td><td>${o.days ?? '—'}</td><td>${fmt(o.mape)}</td><td>${fmt(p.mape)}</td><td>${o.late_hours ?? '—'}</td></tr>`; });
+  document.getElementById('board').innerHTML = h + '</table>';
+} else { document.getElementById('board').textContent = 'No scored days yet.'; }
+if (D.daily.length) {
+  const series = {};
+  D.daily.forEach(r => { const k = r.model === 'lgbm_live' ? 'GridCast' : 'operator'; (series[k] ||= {}); (series[k][r.target_day] ||= []).push(r.mape); });
+  const traces = Object.entries(series).map(([k, v]) => { const days = Object.keys(v).sort();
+    return {x:days, y:days.map(d => v[d].reduce((a,b)=>a+b,0)/v[d].length), mode:'lines+markers', name:k}; });
+  Plotly.react('daily', traces, layout('MAPE %, mean over BAs'), {responsive:true, displayModeBar:false});
+} else { document.getElementById('daily').parentElement.style.display = 'none'; }
+
+// validation
+const V = D.validation;
+if (V.rows) {
+  document.getElementById('valmeta').innerHTML = `Run <code>${esc(V.run_id)}</code>, target days ${esc(V.window[0])} → ${esc(V.window[1])}. Pooled MAPE: ` +
+    V.overall.map(r => `${esc(r.model)} ${fmt(r.mape)} %`).join(' · ');
+  const models = [...new Set(V.rows.map(r => r.model))], bas = [...new Set(V.rows.map(r => r.ba_code))].sort();
+  let h = '<table><tr><th>BA</th>' + models.map(m => `<th>${esc(m)}</th>`).join('') + '</tr>';
+  bas.forEach(b => { h += `<tr><td>${esc(b)}</td>` + models.map(m => { const r = V.rows.find(x => x.ba_code === b && x.model === m); return `<td>${fmt(r?.mape)}</td>`; }).join('') + '</tr>'; });
+  document.getElementById('val').innerHTML = h + '</table>';
+}
+</script>
+</body>
+</html>

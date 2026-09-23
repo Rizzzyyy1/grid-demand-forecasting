@@ -1,6 +1,8 @@
 # ADR-0008: Deploy to one small host with Docker Compose, defined in OpenTofu/Terraform
 
-Status: Accepted (not yet applied — needs the owner's AWS account) · 2026-09-23
+Status: **Validated, intentionally not deployed (cost)** · 2026-09-23 — superseded for the running
+system by ADR-0009 (GitHub Actions + Pages, zero cost). Kept as a reviewed, `tofu validate`d
+reference deployment; applying it would create billable AWS resources.
 
 ## Context
 The workload is one daily batch job (minutes of CPU), a weekly retrain, and two read-only web

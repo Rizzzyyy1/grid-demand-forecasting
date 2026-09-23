@@ -180,7 +180,9 @@ source_modules = [
     "gridcast.core", "gridcast.ingestion", "gridcast.features", "gridcast.models",
     "gridcast.evaluation", "gridcast.experiments", "gridcast.warehouse",
 ]
-forbidden_modules = ["gridcast.orchestration", "gridcast.serving", "gridcast.ui", "gridcast.cli"]
+forbidden_modules = [
+    "gridcast.orchestration", "gridcast.serving", "gridcast.ui", "gridcast.cli", "gridcast.site",
+]
 
 [[tool.importlinter.contracts]]
 name = "layers"

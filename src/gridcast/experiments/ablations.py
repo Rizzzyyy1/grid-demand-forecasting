@@ -19,7 +19,7 @@ import structlog
 
 from gridcast.core.domain import ProtocolConfig
 from gridcast.core.regions import all_regions
-from gridcast.core.settings import Settings
+from gridcast.core.settings import Settings, ensure_offline
 from gridcast.evaluation.backtest import BacktestConfig, run_backtest
 from gridcast.evaluation.metrics import point_metrics, score
 from gridcast.evaluation.stats import bootstrap_skill, diebold_mariano
@@ -84,6 +84,7 @@ def run_ablations(
     settings: Settings, variants: list[Variant], start: date, end: date, n_boot: int = 1000
 ) -> Path:
     """Run every variant over [start, end]; write ``reports/ablations/<id>/summary.md``."""
+    ensure_offline(settings, "ablations")
     run_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     out = settings.reports_dir / "ablations" / run_id
     out.mkdir(parents=True)

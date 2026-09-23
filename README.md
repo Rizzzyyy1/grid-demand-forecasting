@@ -16,6 +16,23 @@ GridCast asks **how close an open pipeline built only from public data can get â
 regions, seasons and hours it wins or loses, and why.** Losing by a measured, explained margin is
 a valid result; the project is judged on rigour, not on winning.
 
+## Live
+
+**Dashboard: https://rizzzyyy1.github.io/grid-demand-forecasting/**
+
+Every day at 12:30 UTC a scheduled GitHub Actions job runs the whole pipeline at zero cost. It
+downloads recent EIA and weather data, runs `dbt build` with its data tests, issues tomorrow's
+forecasts with the frozen, checksummed model, scores past days against published actuals, and
+redeploys the dashboard.
+
+* Issued forecasts are appended to the [`live-data`](../../tree/live-data) branch as immutable
+  files; a guard refuses any commit that would rewrite one.
+* The live record only covers days after the locked test window and is never mixed with
+  backtest numbers.
+* The job runs in a live mode that cannot train, backtest or touch the test split.
+
+Details: [ADR-0009](docs/adr/0009-free-live-deployment-on-github.md).
+
 ## Results
 
 <!-- results:start -->
@@ -140,8 +157,9 @@ test suite (no network, no keys). `make test-all` adds the slow dbt-integration 
 
 Every non-obvious choice is an ADR in [`docs/adr/`](docs/adr/): benchmarking against operators
 (0001), DuckDB + dbt rather than Spark/Kafka/a feature store (0002), the model ladder (0003),
-weather inputs (0004), the debiased benchmark (0005), features in Polars not dbt (0006) and the two
-latency protocols (0007). The design is in [`docs/DESIGN.md`](docs/DESIGN.md) and the phase plan in
+weather inputs (0004), the debiased benchmark (0005), features in Polars not dbt (0006), the two
+latency protocols (0007), a single-host AWS deployment that is validated but intentionally not
+deployed because of cost (0008), and the zero-cost live system on GitHub Actions + Pages (0009). The design is in [`docs/DESIGN.md`](docs/DESIGN.md) and the phase plan in
 [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Data sources and licences

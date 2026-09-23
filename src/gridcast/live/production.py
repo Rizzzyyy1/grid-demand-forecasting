@@ -19,7 +19,7 @@ import structlog
 
 from gridcast.core.domain import ProtocolConfig
 from gridcast.core.regions import all_regions
-from gridcast.core.settings import Settings
+from gridcast.core.settings import Settings, ensure_offline
 from gridcast.features.build import FeatureConfig, build_features, check_point_in_time
 from gridcast.models.gbm import LightGBMForecaster
 from gridcast.warehouse.duck import read_demand, read_weather
@@ -72,6 +72,8 @@ def train_production(
 ) -> TrainedModel:
     """Fit on every row whose actual is published under the live protocol, and register it."""
     import mlflow  # noqa: PLC0415 - ml extra
+
+    ensure_offline(settings, "training")
 
     config = FeatureConfig(protocol=LIVE_PROTOCOL)
     last_day = today - timedelta(days=LIVE_PROTOCOL.recent_day_offset)

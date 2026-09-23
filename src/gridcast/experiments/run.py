@@ -22,7 +22,7 @@ import structlog
 
 from gridcast.core.domain import ProtocolConfig
 from gridcast.core.regions import all_regions
-from gridcast.core.settings import Settings, Window
+from gridcast.core.settings import Settings, Window, ensure_offline
 from gridcast.evaluation.backtest import BacktestConfig, BacktestResult, run_backtest
 from gridcast.evaluation.metrics import (
     interval_metrics,
@@ -87,7 +87,8 @@ def _window(settings: Settings, split: str) -> Window:
 
 
 def guard_test_split(settings: Settings, split: str, confirmed: bool) -> None:
-    """Refuse to touch the test split unless confirmed, and only ever once."""
+    """Refuse to touch the test split unless confirmed, and only ever once (never in live mode)."""
+    ensure_offline(settings, f"a {split} backtest")
     if split != "test":
         return
     lock = settings.reports_dir / TEST_LOCK
@@ -469,6 +470,7 @@ def rescore(settings: Settings, run_id: str, n_boot: int | None = None) -> Path:
     Forecasts are never touched (they are the run's immutable output); only derived files are
     rewritten, and ``config.json`` records when that happened.
     """
+    ensure_offline(settings, "rescoring a run")
     out = settings.reports_dir / "runs" / run_id
     cfg = json.loads((out / "config.json").read_text())
     forecasts = pl.read_parquet(out / "forecasts.parquet")
@@ -521,6 +523,7 @@ def combine_runs(settings: Settings, run_ids: list[str], tag: str) -> Path:
     common set of hours with one set of CIs. Benchmark rows present in several runs are
     de-duplicated (they are deterministic).
     """
+    ensure_offline(settings, "combining runs")
     configs = [
         json.loads((settings.reports_dir / "runs" / r / "config.json").read_text()) for r in run_ids
     ]
