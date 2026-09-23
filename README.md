@@ -4,6 +4,8 @@
 against the grid operators' own published forecasts, under a protocol that makes information
 leakage impossible to miss.**
 
+[![CI](https://github.com/Rizzzyyy1/grid-demand-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/Rizzzyyy1/grid-demand-forecasting/actions/workflows/ci.yml)
+
 Python 3.13 · uv · Polars · DuckDB · dbt · Dagster · LightGBM · N-HiTS (PyTorch) · MLflow ·
 FastAPI · Streamlit · Docker Compose · GitHub Actions
 
@@ -17,22 +19,22 @@ a valid result; the project is judged on rigour, not on winning.
 ## Results
 
 <!-- results:start -->
-Validation run `20260923T200801Z-ladder-v3` · target days 2023-07-01 → 2024-06-30 · 15 monthly refits · leakage check: 5,928,038 feature values, 0 violations.
+Validation run `20260923T212828Z-final-v3` · target days 2023-07-01 → 2024-06-30 · 15 monthly refits · leakage check: 5,928,038 feature values, 0 violations.
 
 **MAPE (%) by region** (lower is better; bold = best of our models):
 
-| BA | operator | operator_debiased | seasonal_naive | ridge | lgbm_global |
-|---|---|---|---|---|---|
-| CISO | 6.27 | 2.67 | 6.60 | 4.40 | **3.20** |
-| ERCO | 2.42 | 2.38 | 8.10 | 5.40 | **4.02** |
-| FPL | 3.22 | 2.18 | 8.75 | 5.95 | **4.20** |
-| ISNE | 2.49 | 1.90 | 10.35 | 6.73 | **5.26** |
-| MISO | 3.11 | 1.75 | 6.80 | 4.15 | **2.57** |
-| NYIS | 2.63 | 1.74 | 8.33 | 4.91 | **3.47** |
-| PJM | 3.59 | 2.06 | 8.56 | 5.04 | **2.93** |
-| SOCO | 1.91 | 0.95 | 9.76 | 6.49 | **4.43** |
-| SWPP | 2.56 | 2.58 | 8.10 | 5.05 | **3.39** |
-| TVA | 2.38 | 2.40 | 11.00 | 7.07 | **4.26** |
+| BA | seasonal_naive | operator | operator_debiased | lgbm_global | nhits | ridge |
+|---|---|---|---|---|---|---|
+| CISO | 6.60 | 6.27 | 2.67 | **3.20** | 4.48 | 4.40 |
+| ERCO | 8.10 | 2.42 | 2.38 | **4.02** | 4.69 | 5.40 |
+| FPL | 8.75 | 3.22 | 2.18 | **4.20** | 5.99 | 5.95 |
+| ISNE | 10.35 | 2.49 | 1.90 | **5.26** | 6.49 | 6.73 |
+| MISO | 6.80 | 3.11 | 1.75 | **2.57** | 3.13 | 4.15 |
+| NYIS | 8.33 | 2.63 | 1.74 | **3.47** | 4.62 | 4.91 |
+| PJM | 8.56 | 3.59 | 2.06 | **2.93** | 3.74 | 5.04 |
+| SOCO | 9.76 | 1.91 | 0.95 | **4.43** | 5.11 | 6.49 |
+| SWPP | 8.10 | 2.56 | 2.58 | **3.39** | 3.81 | 5.05 |
+| TVA | 11.00 | 2.38 | 2.40 | **4.26** | 5.49 | 7.07 |
 
 **Skill of `lgbm_global` vs the debiased operator forecast** (1 - MAE/MAE_ref; 95 % moving-block bootstrap CI; Diebold-Mariano p): significantly better in 0, significantly worse in 10, inconclusive in 0 of 10 regions.
 
@@ -49,7 +51,7 @@ Validation run `20260923T200801Z-ladder-v3` · target days 2023-07-01 → 2024-0
 | SWPP | -0.340 | [-0.521, -0.172] | 0.00072 |
 | TVA | -0.790 | [-1.267, -0.489] | 9.8e-05 |
 
-Full tables: [`reports/runs/20260923T200801Z-ladder-v3/summary.md`](reports/runs/20260923T200801Z-ladder-v3/summary.md).
+Full tables: [`reports/runs/20260923T212828Z-final-v3/summary.md`](reports/runs/20260923T212828Z-final-v3/summary.md).
 <!-- results:end -->
 
 The test period (2024-07-01 → 2026-06-30) is **locked**: the CLI refuses to evaluate it without

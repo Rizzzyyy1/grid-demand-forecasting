@@ -1,0 +1,57 @@
+{
+  "run_id": "20260923T201623Z-nhits-v3",
+  "split": "validation",
+  "window": [
+    "2023-07-01",
+    "2024-06-30"
+  ],
+  "models": [
+    "operator",
+    "operator_debiased",
+    "nhits"
+  ],
+  "train_start": "2021-04-01",
+  "feature_config": {
+    "population_weighted": false,
+    "protocol": {
+      "name": "realtime",
+      "issue_time": "10:00:00",
+      "demand_cutoff_time": "06:00:00",
+      "demand_cutoff_days_before": 1,
+      "weather_lead_days": 2
+    }
+  },
+  "git_sha": "f7cc378",
+  "leakage": {
+    "rows_checked": 284880,
+    "cells_checked": 5928038,
+    "origins_checked": 11870,
+    "violations": 0
+  },
+  "refits": 15,
+  "train_gap_checks": 102960,
+  "null_forecasts": {
+    "operator": 146,
+    "operator_debiased": 146,
+    "nhits": 0
+  },
+  "fit_seconds": {
+    "operator": 0.007139292079955339,
+    "operator_debiased": 0.11926416656933725,
+    "nhits": 4300.860812083236
+  },
+  "n_boot": 1000,
+  "conformal": {
+    "nhits+cqr": {
+      "days_calibrated": 4070,
+      "days_uncalibrated": 220
+    }
+  },
+  "burn_in_days": 63,
+  "models_scored": [
+    "operator",
+    "operator_debiased",
+    "nhits",
+    "nhits+cqr"
+  ]
+}

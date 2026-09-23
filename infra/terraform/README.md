@@ -7,7 +7,7 @@ encrypted, private S3 bucket; a budget alert emails at 80 % of the monthly limit
 ```bash
 cd infra/terraform
 tofu init            # or: terraform init
-tofu plan  -var repo_url=https://github.com/<you>/gridcast.git -var admin_cidr=<your-ip>/32 -var budget_email=<you@example.com>
+tofu plan  -var repo_url=https://github.com/Rizzzyyy1/grid-demand-forecasting.git -var admin_cidr=<your-ip>/32 -var budget_email=<you@example.com>
 tofu apply ...       # needs AWS credentials in your shell; not run by the author's agent
 tofu destroy ...     # tears everything down; the bucket is force-destroyable by design
 ```
