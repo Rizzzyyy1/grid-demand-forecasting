@@ -1,0 +1,26 @@
+#cloud-config
+package_update: true
+# awscli is not packaged for Ubuntu 24.04; it is installed from the official snap below
+packages: [docker.io, docker-compose-v2, git, caddy]
+write_files:
+  - path: /etc/caddy/Caddyfile
+    content: |
+      :80 {
+        handle_path /api/* {
+          reverse_proxy 127.0.0.1:8000
+        }
+        reverse_proxy 127.0.0.1:8501
+      }
+  - path: /etc/cron.d/gridcast-backup
+    content: |
+      # nightly backup of data/ and reports/ (the forecast store is the irreplaceable part)
+      30 3 * * * root /snap/bin/aws s3 sync /opt/gridcast/data s3://${bucket}/data --exclude "raw/*" && /snap/bin/aws s3 sync /opt/gridcast/reports s3://${bucket}/reports
+runcmd:
+  - [snap, install, aws-cli, --classic]
+  - [systemctl, enable, --now, docker]
+  - [git, clone, --branch, "${git_ref}", "${repo_url}", /opt/gridcast]
+  - [bash, -c, "/snap/bin/aws s3 sync s3://${bucket}/data /opt/gridcast/data || true"]
+  - [bash, -c, "mkdir -p /opt/gridcast/data /opt/gridcast/reports && chown -R 1000:1000 /opt/gridcast/data /opt/gridcast/reports"]
+  - [bash, -c, "echo GRIDCAST_API_ROOT_PATH=/api > /opt/gridcast/.env"]
+  - [bash, -c, "cd /opt/gridcast && docker compose up -d --build"]
+  - [systemctl, restart, caddy]

@@ -1,0 +1,121 @@
+slice,value,model,hours,mape
+day_type,holiday,lgbm_global,2876,5.635460413317697
+day_type,holiday,lgbm_global+cqr,2876,5.635460413317684
+day_type,holiday,operator,2876,3.135642273922064
+day_type,holiday,operator_debiased,2876,2.2176646042508543
+day_type,holiday,ridge,2876,7.427262629967818
+day_type,holiday,ridge+cqr,2876,7.427262629967821
+day_type,holiday,seasonal_naive,2876,10.912508104413652
+day_type,holiday,seasonal_naive+cqr,2876,10.912508104413671
+day_type,weekday,lgbm_global,59529,4.159303165666643
+day_type,weekday,lgbm_global+cqr,59529,4.159303165666605
+day_type,weekday,operator,59529,3.039247708693462
+day_type,weekday,operator_debiased,59529,1.973919927893786
+day_type,weekday,ridge,59529,5.393116772048841
+day_type,weekday,ridge+cqr,59529,5.39311677204893
+day_type,weekday,seasonal_naive,59529,8.48993169445135
+day_type,weekday,seasonal_naive+cqr,59529,8.489931694451428
+day_type,weekend,lgbm_global,25113,4.130646878786895
+day_type,weekend,lgbm_global+cqr,25113,4.130646878786903
+day_type,weekend,operator,25113,3.0876075016954463
+day_type,weekend,operator_debiased,25113,2.2488154286542916
+day_type,weekend,ridge,25113,5.749308587865194
+day_type,weekend,ridge+cqr,25113,5.7493085878651735
+day_type,weekend,seasonal_naive,25113,8.713791408016395
+day_type,weekend,seasonal_naive+cqr,25113,8.713791408016371
+hour_block,00,lgbm_global,21878,3.526047081152252
+hour_block,00,lgbm_global+cqr,21878,3.526047081152242
+hour_block,00,operator,21878,3.07385793347661
+hour_block,00,operator_debiased,21878,1.8009218170497194
+hour_block,00,ridge,21878,4.988943062826908
+hour_block,00,ridge+cqr,21878,4.9889430628268805
+hour_block,00,seasonal_naive,21878,8.21296048457762
+hour_block,00,seasonal_naive+cqr,21878,8.212960484577618
+hour_block,06,lgbm_global,21887,4.172349995850128
+hour_block,06,lgbm_global+cqr,21887,4.172349995850125
+hour_block,06,operator,21887,3.082942026999058
+hour_block,06,operator_debiased,21887,1.9827420484931575
+hour_block,06,ridge,21887,5.853681308094234
+hour_block,06,ridge+cqr,21887,5.8536813080942105
+hour_block,06,seasonal_naive,21887,8.333356164028805
+hour_block,06,seasonal_naive+cqr,21887,8.333356164028732
+hour_block,12,lgbm_global,21887,5.04247746354891
+hour_block,12,lgbm_global+cqr,21887,5.04247746354889
+hour_block,12,operator,21887,3.3408363988553513
+hour_block,12,operator_debiased,21887,2.494380083373054
+hour_block,12,ridge,21887,6.034925561546547
+hour_block,12,ridge+cqr,21887,6.034925561546537
+hour_block,12,seasonal_naive,21887,9.769606947780057
+hour_block,12,seasonal_naive+cqr,21887,9.76960694778003
+hour_block,18,lgbm_global,21866,4.057069913076496
+hour_block,18,lgbm_global+cqr,21866,4.057069913076511
+hour_block,18,operator,21866,2.7272234951712147
+hour_block,18,operator_debiased,21866,1.9649979436403735
+hour_block,18,ridge,21866,5.370712856937107
+hour_block,18,ridge+cqr,21866,5.370712856937108
+hour_block,18,seasonal_naive,21866,8.218616009652203
+hour_block,18,seasonal_naive+cqr,21866,8.218616009652267
+season,autumn,lgbm_global,21687,3.488776909037623
+season,autumn,lgbm_global+cqr,21687,3.4887769090376453
+season,autumn,operator,21687,2.703862894580757
+season,autumn,operator_debiased,21687,1.868674246914416
+season,autumn,ridge,21687,5.0935778175081055
+season,autumn,ridge+cqr,21687,5.093577817508111
+season,autumn,seasonal_naive,21687,8.917893323469904
+season,autumn,seasonal_naive+cqr,21687,8.917893323469904
+season,spring,lgbm_global,22010,3.575460529866252
+season,spring,lgbm_global+cqr,22010,3.575460529866256
+season,spring,operator,22010,3.2993817921053386
+season,spring,operator_debiased,22010,2.0703896506156365
+season,spring,ridge,22010,4.666929924580777
+season,spring,ridge+cqr,22010,4.66692992458077
+season,spring,seasonal_naive,22010,7.202374491038956
+season,spring,seasonal_naive+cqr,22010,7.20237449103896
+season,summer,lgbm_global,21985,4.205320922420498
+season,summer,lgbm_global+cqr,21985,4.205320922420496
+season,summer,operator,21985,3.173819656284971
+season,summer,operator_debiased,21985,2.143525014977028
+season,summer,ridge,21985,5.908964956190499
+season,summer,ridge+cqr,21985,5.908964956190491
+season,summer,seasonal_naive,21985,8.70076552048967
+season,summer,seasonal_naive+cqr,21985,8.700765520489671
+season,winter,lgbm_global,21836,5.528883760605252
+season,winter,lgbm_global+cqr,21836,5.528883760605267
+season,winter,operator,21836,3.042960168449099
+season,winter,operator_debiased,21836,2.1586999721586717
+season,winter,ridge,21836,6.580779349879683
+season,winter,ridge+cqr,21836,6.580779349879712
+season,winter,seasonal_naive,21836,9.726965367053413
+season,winter,seasonal_naive+cqr,21836,9.72696536705344
+temperature,cold 5%,lgbm_global,4294,5.697160609081217
+temperature,cold 5%,lgbm_global+cqr,4294,5.697160609081225
+temperature,cold 5%,operator,4294,3.339418954395266
+temperature,cold 5%,operator_debiased,4294,2.3194607988838927
+temperature,cold 5%,ridge,4294,7.186473493579532
+temperature,cold 5%,ridge+cqr,4294,7.186473493579527
+temperature,cold 5%,seasonal_naive,4294,10.895833726873976
+temperature,cold 5%,seasonal_naive+cqr,4294,10.895833726873978
+temperature,hot 5%,lgbm_global,4296,3.836641393886445
+temperature,hot 5%,lgbm_global+cqr,4296,3.836641393886446
+temperature,hot 5%,operator,4296,3.058709969187991
+temperature,hot 5%,operator_debiased,4296,1.9990571155764152
+temperature,hot 5%,ridge,4296,4.955425208466297
+temperature,hot 5%,ridge+cqr,4296,4.955425208466294
+temperature,hot 5%,seasonal_naive,4296,10.887386791841761
+temperature,hot 5%,seasonal_naive+cqr,4296,10.887386791841767
+temperature,no weather,lgbm_global,5039,8.191712063457462
+temperature,no weather,lgbm_global+cqr,5039,8.191712063457462
+temperature,no weather,operator,5039,3.3405464262823656
+temperature,no weather,operator_debiased,5039,2.478044591950165
+temperature,no weather,ridge,5039,8.643227859020664
+temperature,no weather,ridge+cqr,5039,8.643227859020664
+temperature,no weather,seasonal_naive,5039,10.388953966694602
+temperature,no weather,seasonal_naive+cqr,5039,10.388953966694602
+temperature,normal,lgbm_global,73889,3.861411322299035
+temperature,normal,lgbm_global+cqr,73889,3.8614113222989923
+temperature,normal,operator,73889,3.020312560203131
+temperature,normal,operator_debiased,73889,2.0209152094553895
+temperature,normal,ridge,73889,5.292933902956263
+temperature,normal,ridge+cqr,73889,5.292933902956273
+temperature,normal,seasonal_naive,73889,8.25159493372058
+temperature,normal,seasonal_naive+cqr,73889,8.251594933720675

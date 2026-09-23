@@ -1,0 +1,29 @@
+version: 2
+
+seeds:
+  - name: regions
+    description: Generated from gridcast/resources/regions.yaml by `gridcast seeds`. Do not edit.
+    config:
+      column_types: {ba_code: varchar, name: varchar, timezone: varchar, n_cities: integer}
+    columns:
+      - name: ba_code
+        tests: [unique, not_null]
+  - name: cities
+    description: Weather cities per BA with population weights. Generated; do not edit.
+    config:
+      column_types:
+        {ba_code: varchar, city: varchar, city_slug: varchar, latitude: double,
+         longitude: double, population: bigint, weight: double}
+    columns:
+      - name: ba_code
+        tests:
+          - relationships: {arguments: {to: ref('regions'), field: ba_code}}
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, city_slug]}}
+  - name: us_holidays
+    description: US federal holidays (observed dates) from the `holidays` package. Generated.
+    config:
+      column_types: {holiday_date: date, holiday_name: varchar}
+    columns:
+      - name: holiday_date
+        tests: [unique, not_null]

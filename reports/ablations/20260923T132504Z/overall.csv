@@ -1,0 +1,6 @@
+variant,description,mape,mae,hours,seconds
+baseline,"global LightGBM, population-weighted weather, realtime protocol",3.88349546069562,1319.4761481642302,87632,649.0249009568943
+unweighted_weather,plain mean over cities,3.777752485346806,1277.8869414979677,87632,643.6035560009768
+per_ba_models,one LightGBM per BA instead of one global,4.012950824656497,1374.7976090170005,87632,3336.508618378197
+short_history,training from 2022-07-01 instead of 2021-04-01,4.001944783221743,1362.6485262282429,87632,731.8141749992501
+bulk_latency,demand only to the end of D-3 (keyless live feed),4.494910534437684,1537.0066326844235,87632,557.8427973773796

@@ -1,0 +1,33 @@
+name: gridcast
+version: "0.1.0"
+config-version: 2
+profile: gridcast
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Relative to this directory by default; the CLI / Dagster pass an absolute path.
+  raw_dir: "{{ env_var('GRIDCAST_RAW_DIR', '../data/raw') }}"
+  # Observed (reanalysis) weather is only needed for the perfect-weather ablation.
+  observed_weather: false
+  # Cleaning thresholds (documented in models/intermediate/_intermediate.yml).
+  outlier_low_ratio: 0.5
+  outlier_high_ratio: 1.6
+
+models:
+  gridcast:
+    +materialized: table
+    staging:
+      +materialized: table  # raw CSV/JSON scans are expensive; read them once
+    marts:
+      +materialized: table
+
+seeds:
+  gridcast:
+    +schema: ref

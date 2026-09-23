@@ -1,0 +1,56 @@
+# Local stack: `docker compose up --build`, then
+#   dashboard http://localhost:8501 · API docs http://localhost:8000/docs
+#   Dagster   http://localhost:3000 · MLflow   http://localhost:5001
+# ./data and ./reports are bind-mounted so the stack shares state with the host CLI.
+x-app: &app
+  build: .
+  image: gridcast:latest
+  volumes:
+    - ./data:/app/data
+    - ./reports:/app/reports
+    - dagster-home:/app/.dagster
+  environment:
+    GRIDCAST_BASE_DIR: /app
+    DAGSTER_HOME: /app/.dagster
+  restart: unless-stopped
+
+services:
+  api:
+    <<: *app
+    command: ["gridcast", "serve", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      GRIDCAST_API_ROOT_PATH: ${GRIDCAST_API_ROOT_PATH:-}
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ui:
+    <<: *app
+    command: ["gridcast", "ui", "--port", "8501"]
+    environment:
+      GRIDCAST_API_URL: http://api:8000
+    ports: ["8501:8501"]
+    depends_on:
+      api:
+        condition: service_healthy
+
+  dagster-webserver:
+    <<: *app
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3000", "-m", "gridcast.orchestration.definitions"]
+    ports: ["3000:3000"]
+
+  dagster-daemon:
+    <<: *app
+    command: ["dagster-daemon", "run", "-m", "gridcast.orchestration.definitions"]
+
+  mlflow:
+    <<: *app
+    command: ["mlflow", "ui", "--backend-store-uri", "sqlite:////app/data/mlflow.db",
+              "--host", "0.0.0.0", "--port", "5000"]
+    ports: ["5001:5000"]  # host 5000 is taken by macOS AirPlay Receiver
+
+volumes:
+  dagster-home:

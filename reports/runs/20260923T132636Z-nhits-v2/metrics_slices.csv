@@ -1,0 +1,61 @@
+slice,value,model,hours,mape
+day_type,holiday,nhits,2880,7.101431769243052
+day_type,holiday,nhits+cqr,2880,7.101431769243052
+day_type,holiday,operator,2880,3.139659867681044
+day_type,holiday,operator_debiased,2880,2.2278338820183117
+day_type,weekday,nhits,59555,5.072548132189256
+day_type,weekday,nhits+cqr,59555,5.072548132189246
+day_type,weekday,operator,59555,3.039118134221961
+day_type,weekday,operator_debiased,59555,1.9740140030500999
+day_type,weekend,nhits,25124,5.495812274546225
+day_type,weekend,nhits+cqr,25124,5.495812274546226
+day_type,weekend,operator,25124,3.08732775088817
+day_type,weekend,operator_debiased,25124,2.24850754949476
+hour_block,00,nhits,21893,4.174254477595723
+hour_block,00,nhits+cqr,21893,4.1742544775956985
+hour_block,00,operator,21893,3.073568310315278
+hour_block,00,operator_debiased,21893,1.8015742928719216
+hour_block,06,nhits,21893,5.241318566866026
+hour_block,06,nhits+cqr,21893,5.241318566866033
+hour_block,06,operator,21893,3.083130407747546
+hour_block,06,operator_debiased,21893,1.9827222626227934
+hour_block,12,nhits,21893,6.30219016528987
+hour_block,12,nhits+cqr,21893,6.3021901652898595
+hour_block,12,operator,21893,3.3403187420043357
+hour_block,12,operator_debiased,21893,2.4940486938653326
+hour_block,18,nhits,21880,5.325206816387484
+hour_block,18,nhits+cqr,21880,5.325206816387471
+hour_block,18,operator,21880,2.7278208438105427
+hour_block,18,operator_debiased,21880,1.9660994817700301
+season,autumn,nhits,21716,4.756013105272929
+season,autumn,nhits+cqr,21716,4.756013105272919
+season,autumn,operator,21716,2.70469978892237
+season,autumn,operator_debiased,21716,1.870439325287339
+season,spring,nhits,22020,4.871531648079625
+season,spring,nhits+cqr,22020,4.871531648079649
+season,spring,operator,22020,3.2989076113858022
+season,spring,operator_debiased,22020,2.0701818888269745
+season,summer,nhits,21985,5.1979054875851
+season,summer,nhits+cqr,21985,5.197905487585093
+season,summer,operator,21985,3.173819656284971
+season,summer,operator_debiased,21985,2.143525014977028
+season,winter,nhits,21838,6.218328393821386
+season,winter,nhits+cqr,21838,6.2183283938213885
+season,winter,operator,21838,3.04282864518028
+season,winter,operator_debiased,21838,2.1586595004665208
+temperature,cold 5%,nhits,4295,8.563626242193669
+temperature,cold 5%,nhits+cqr,4295,8.563626242193658
+temperature,cold 5%,operator,4295,3.33894513108251
+temperature,cold 5%,operator_debiased,4295,2.3193712079148443
+temperature,hot 5%,nhits,4296,4.810784163938389
+temperature,hot 5%,nhits+cqr,4296,4.810784163938391
+temperature,hot 5%,operator,4296,3.058709969187985
+temperature,hot 5%,operator_debiased,4296,1.9990571155764152
+temperature,no weather,nhits,5039,7.066352873965735
+temperature,no weather,nhits+cqr,5039,7.066352873965735
+temperature,no weather,operator,5039,3.3405464262823674
+temperature,no weather,operator_debiased,5039,2.478044591950168
+temperature,normal,nhits,73929,4.971922513265917
+temperature,normal,nhits+cqr,73929,4.9719225132659215
+temperature,normal,operator,73929,3.020315742241303
+temperature,normal,operator_debiased,73929,2.021311715294679

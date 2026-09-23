@@ -1,0 +1,120 @@
+# Balancing authorities modelled by GridCast and the cities whose weather represents them.
+#
+# timezone: the clock EIA-930 uses for the BA's "Local Time at End of Hour" column, verified on
+#   2026-09-23 by comparing local and UTC columns across the 2025-03-09 DST change. MISO reports in
+#   Eastern Standard Time all year (24 hours on spring-forward day), so it is the fixed zone Etc/GMT+5.
+#   SOCO and TVA report in US Central time.
+# population: metropolitan statistical area (MSA) population, 2020 US Census, rounded to 10k.
+#   Values are approximate (not yet cross-checked against the Census tables - TODO before citing)
+#   and are used only as relative weights; the population-weighting ablation (DESIGN section 5)
+#   measures how much they matter.
+# City choice: the largest metros inside each BA's service footprint (3-6 per BA). Known
+#   imperfections are listed in `notes` rather than hidden.
+
+balancing_authorities:
+  - code: PJM
+    name: PJM Interconnection
+    timezone: America/New_York
+    notes: Chicago is served by ComEd, which is a PJM zone.
+    cities:
+      - {name: Chicago, latitude: 41.88, longitude: -87.63, population: 9620000}
+      - {name: Washington, latitude: 38.91, longitude: -77.04, population: 6390000}
+      - {name: Philadelphia, latitude: 39.95, longitude: -75.17, population: 6250000}
+      - {name: Baltimore, latitude: 39.29, longitude: -76.61, population: 2840000}
+      - {name: Pittsburgh, latitude: 40.44, longitude: -80.00, population: 2370000}
+      - {name: Columbus, latitude: 39.96, longitude: -83.00, population: 2140000}
+
+  - code: MISO
+    name: Midcontinent Independent System Operator
+    timezone: Etc/GMT+5
+    notes: Reports in EST year-round. Footprint spans Central and Eastern time.
+    cities:
+      - {name: Detroit, latitude: 42.33, longitude: -83.05, population: 4390000}
+      - {name: Minneapolis, latitude: 44.98, longitude: -93.27, population: 3690000}
+      - {name: St. Louis, latitude: 38.63, longitude: -90.20, population: 2820000}
+      - {name: Indianapolis, latitude: 39.77, longitude: -86.16, population: 2110000}
+      - {name: Milwaukee, latitude: 43.04, longitude: -87.91, population: 1570000}
+      - {name: New Orleans, latitude: 29.95, longitude: -90.07, population: 1270000}
+
+  - code: ERCO
+    name: Electric Reliability Council of Texas
+    timezone: America/Chicago
+    cities:
+      - {name: Dallas-Fort Worth, latitude: 32.78, longitude: -96.80, population: 7640000}
+      - {name: Houston, latitude: 29.76, longitude: -95.37, population: 7120000}
+      - {name: San Antonio, latitude: 29.42, longitude: -98.49, population: 2560000}
+      - {name: Austin, latitude: 30.27, longitude: -97.74, population: 2280000}
+
+  - code: SWPP
+    name: Southwest Power Pool
+    timezone: America/Chicago
+    notes: Kansas City is split between SPP members; kept because it is the largest load centre.
+    cities:
+      - {name: Kansas City, latitude: 39.10, longitude: -94.58, population: 2190000}
+      - {name: Oklahoma City, latitude: 35.47, longitude: -97.52, population: 1430000}
+      - {name: Tulsa, latitude: 36.15, longitude: -95.99, population: 1020000}
+      - {name: Omaha, latitude: 41.26, longitude: -95.93, population: 970000}
+      - {name: Wichita, latitude: 37.69, longitude: -97.34, population: 650000}
+
+  - code: SOCO
+    name: Southern Company Services
+    timezone: America/Chicago
+    cities:
+      - {name: Atlanta, latitude: 33.75, longitude: -84.39, population: 6090000}
+      - {name: Birmingham, latitude: 33.52, longitude: -86.80, population: 1120000}
+      - {name: Mobile, latitude: 30.69, longitude: -88.04, population: 430000}
+      - {name: Savannah, latitude: 32.08, longitude: -81.09, population: 400000}
+
+  - code: CISO
+    name: California Independent System Operator
+    timezone: America/Los_Angeles
+    notes: >-
+      The City of Los Angeles (LADWP) and Sacramento (SMUD/BANC) are separate BAs; the metros are
+      kept because their surroundings (SCE, PG&E territory) are CAISO and share their weather.
+    cities:
+      - {name: Los Angeles, latitude: 34.05, longitude: -118.24, population: 13200000}
+      - {name: San Francisco, latitude: 37.77, longitude: -122.42, population: 4750000}
+      - {name: Riverside, latitude: 33.95, longitude: -117.40, population: 4600000}
+      - {name: San Jose, latitude: 37.34, longitude: -121.89, population: 2000000}
+      - {name: Fresno, latitude: 36.74, longitude: -119.79, population: 1010000}
+
+  - code: TVA
+    name: Tennessee Valley Authority
+    timezone: America/Chicago
+    cities:
+      - {name: Nashville, latitude: 36.16, longitude: -86.78, population: 1990000}
+      - {name: Memphis, latitude: 35.15, longitude: -90.05, population: 1340000}
+      - {name: Knoxville, latitude: 35.96, longitude: -83.92, population: 880000}
+      - {name: Chattanooga, latitude: 35.05, longitude: -85.31, population: 560000}
+      - {name: Huntsville, latitude: 34.73, longitude: -86.59, population: 490000}
+
+  - code: NYIS
+    name: New York Independent System Operator
+    timezone: America/New_York
+    notes: The New York MSA includes New Jersey (PJM); its weather is still representative of NYC.
+    cities:
+      - {name: New York, latitude: 40.71, longitude: -74.01, population: 20100000}
+      - {name: Buffalo, latitude: 42.89, longitude: -78.88, population: 1170000}
+      - {name: Rochester, latitude: 43.16, longitude: -77.61, population: 1090000}
+      - {name: Albany, latitude: 42.65, longitude: -73.76, population: 900000}
+      - {name: Syracuse, latitude: 43.05, longitude: -76.15, population: 660000}
+
+  - code: FPL
+    name: Florida Power & Light
+    timezone: America/New_York
+    notes: FPL does not serve Tampa or Orlando; the cities are on its east and southwest coasts.
+    cities:
+      - {name: Miami, latitude: 25.76, longitude: -80.19, population: 6140000}
+      - {name: Sarasota, latitude: 27.34, longitude: -82.53, population: 830000}
+      - {name: Cape Coral, latitude: 26.64, longitude: -81.87, population: 760000}
+      - {name: Daytona Beach, latitude: 29.21, longitude: -81.02, population: 670000}
+
+  - code: ISNE
+    name: ISO New England
+    timezone: America/New_York
+    cities:
+      - {name: Boston, latitude: 42.36, longitude: -71.06, population: 4940000}
+      - {name: Providence, latitude: 41.82, longitude: -71.41, population: 1680000}
+      - {name: Hartford, latitude: 41.76, longitude: -72.67, population: 1210000}
+      - {name: Worcester, latitude: 42.26, longitude: -71.80, population: 980000}
+      - {name: Portland, latitude: 43.66, longitude: -70.26, population: 550000}

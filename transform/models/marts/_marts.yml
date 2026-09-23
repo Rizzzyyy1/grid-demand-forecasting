@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: dim_ba
+    columns:
+      - name: ba_code
+        tests: [unique, not_null]
+
+  - name: dim_calendar
+    columns:
+      - name: calendar_date
+        tests: [unique, not_null]
+      - name: day_type
+        tests:
+          - accepted_values: {arguments: {values: [weekday, weekend, holiday]}}
+
+  - name: fct_demand_hourly
+    description: >
+      Hourly demand (target), filled demand (features) and the operator's day-ahead forecast
+      (benchmark only - never a feature) for every configured BA.
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, hour_ending_utc]}}
+      - hours_per_local_day: {arguments: {ba_column: ba_code, day_column: local_date}}
+    columns:
+      - name: ba_code
+        tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_ba'), field: ba_code}}
+      - name: local_date
+        description: Local calendar day under the BA's clock; must equal EIA's Data Date.
+        tests:
+          - not_null
+          - equal_to_column: {arguments: {other: eia_local_date}}
+      - name: hour_number
+        tests:
+          - accepted_range: {arguments: {min_value: 1, max_value: 25}}
+          - equal_to_column: {arguments: {other: eia_hour_number}}
+      - name: demand_mw
+        tests:
+          - accepted_range: {arguments: {min_value: 0, max_value: 250000}}
+          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.98}}
+      - name: operator_forecast_mw
+        tests:
+          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.98}}
+
+  - name: fct_weather_forecast_hourly
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, hour_ending_utc]}}
+    columns:
+      - name: ba_code
+        tests:
+          - relationships: {arguments: {to: ref('dim_ba'), field: ba_code}}
+      - name: temperature_c
+        tests:
+          - accepted_range: {arguments: {min_value: -60, max_value: 60}}
+      - name: cloud_cover_pct
+        tests:
+          - accepted_range: {arguments: {min_value: 0, max_value: 100}}
+      - name: relative_humidity_pct
+        tests:
+          - accepted_range: {arguments: {min_value: 0, max_value: 100}}

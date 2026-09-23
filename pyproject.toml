@@ -1,0 +1,195 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gridcast"
+version = "0.1.0"
+description = "Day-ahead electricity-demand forecasting for the ten largest US grid regions, benchmarked against the grid operators' own published forecasts under a leakage-free protocol."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Rizwan Ahmmed" }]
+keywords = ["forecasting", "energy", "time-series", "mlops", "lightgbm", "dbt", "dagster"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+# Core = everything needed to ingest, transform, build features and evaluate.
+# Heavier stacks (training, deep learning, orchestration, serving) live in extras.
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "pyyaml>=6.0",
+    "structlog>=24.4",
+    "typer>=0.12",
+    "rich>=13.8",
+    "httpx>=0.27",
+    "tenacity>=9.0",
+    "polars>=1.9",
+    "duckdb>=1.1",
+    "pyarrow>=17",
+    "numpy>=2.0",
+    "pandera[polars]>=0.21",
+    "holidays>=0.58",
+]
+
+[project.optional-dependencies]
+ml = ["scikit-learn>=1.5", "lightgbm>=4.5", "scipy>=1.14", "mlflow>=2.17", "pandas>=2.2"]
+deep = ["neuralforecast>=1.7", "torch>=2.4", "pandas>=2.2"]
+pipeline = ["dagster>=1.8", "dagster-webserver>=1.8", "dagster-dbt>=0.24", "dbt-duckdb>=1.8", "dbt-core>=1.9,<1.12"]
+serve = ["fastapi>=0.115", "uvicorn[standard]>=0.31"]
+ui = ["streamlit>=1.39", "plotly>=5.24", "pandas>=2.2"]
+monitor = ["evidently>=0.4.40", "pandas>=2.2"]
+all = ["gridcast[ml,deep,pipeline,serve,ui,monitor]"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.112",
+    "respx>=0.21",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "import-linter>=2.1",
+    "types-PyYAML",
+    "pre-commit>=4.0",
+]
+notebooks = [
+    "ipykernel>=7.3.0",
+    "matplotlib>=3.11.2",
+    "nbclient>=0.11.0",
+    "nbformat>=5.11.1",
+]
+
+[project.scripts]
+gridcast = "gridcast.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gridcast"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+# --------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+extend-exclude = ["data", "transform/target", "transform/dbt_packages", "notebooks"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "SIM",      # simplify
+    "C4",       # comprehensions
+    "PTH",      # pathlib
+    "RUF",      # ruff-specific
+    "S",        # bandit (security)
+    "T20",      # no stray print()
+    "PL",       # pylint subset
+    "ARG",      # unused arguments
+    "DTZ",      # no naive datetimes: every timestamp in this project is tz-aware
+    "NPY",      # numpy-specific
+]
+ignore = [
+    "PLR0913",  # many keyword arguments are fine for config-style call sites
+    "PLR2004",  # magic values: domain constants (24 hours, 1000 MW) read fine in context
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "ARG", "PLR", "PLC0415", "T20", "DTZ001", "E501"]
+"scripts/**" = ["T20", "E501"]
+"src/gridcast/cli.py" = ["T20", "PLR0917", "B008"]
+"src/gridcast/evaluation/**" = ["S311"]  # seeded bootstrap sampling, not cryptography
+"src/gridcast/models/**" = ["ARG002"]  # every model implements the full Forecaster signature
+"src/gridcast/ui/**" = ["T20", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gridcast"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# --------------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+files = ["src/gridcast"]
+
+[[tool.mypy.overrides]]
+module = [
+    "lightgbm.*", "sklearn.*", "scipy.*", "mlflow.*", "neuralforecast.*", "holidays.*",
+    "dagster_dbt.*", "streamlit.*", "plotly.*", "evidently.*", "pandas.*", "pyarrow.*",
+    "torch.*",
+]
+ignore_missing_imports = true
+
+# --------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "network: needs internet access (EIA / Open-Meteo)",
+    "slow: takes more than a few seconds",
+]
+filterwarnings = [
+    "error::DeprecationWarning:gridcast.*",
+    "ignore::DeprecationWarning:starlette.*",
+    "ignore:Using `httpx` with `starlette.testclient`",
+]
+
+[tool.coverage.run]
+source = ["src/gridcast"]
+branch = true
+omit = ["src/gridcast/ui/*", "src/gridcast/orchestration/*"]
+
+# --------------------------------------------------------------------------- import-linter
+[tool.importlinter]
+root_package = "gridcast"
+
+[[tool.importlinter.contracts]]
+name = "core imports nothing internal"
+type = "forbidden"
+source_modules = ["gridcast.core"]
+forbidden_modules = [
+    "gridcast.ingestion", "gridcast.features", "gridcast.models", "gridcast.evaluation",
+    "gridcast.serving", "gridcast.ui", "gridcast.orchestration", "gridcast.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "modelling and evaluation never touch ingestion"
+type = "forbidden"
+source_modules = [
+    "gridcast.models", "gridcast.evaluation", "gridcast.features", "gridcast.experiments",
+]
+forbidden_modules = ["gridcast.ingestion"]
+
+[[tool.importlinter.contracts]]
+name = "nothing imports the application edges"
+type = "forbidden"
+source_modules = [
+    "gridcast.core", "gridcast.ingestion", "gridcast.features", "gridcast.models",
+    "gridcast.evaluation", "gridcast.experiments", "gridcast.warehouse",
+]
+forbidden_modules = ["gridcast.orchestration", "gridcast.serving", "gridcast.ui", "gridcast.cli"]
+
+[[tool.importlinter.contracts]]
+name = "layers"
+type = "layers"
+layers = [
+    "gridcast.orchestration",
+    "gridcast.experiments",
+    "gridcast.evaluation",
+    "gridcast.models",
+    "gridcast.features",
+    "gridcast.core",
+]

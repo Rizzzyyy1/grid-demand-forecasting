@@ -1,0 +1,11 @@
+ba_code,name,timezone,n_cities
+PJM,PJM Interconnection,America/New_York,6
+MISO,Midcontinent Independent System Operator,Etc/GMT+5,6
+ERCO,Electric Reliability Council of Texas,America/Chicago,4
+SWPP,Southwest Power Pool,America/Chicago,5
+SOCO,Southern Company Services,America/Chicago,4
+CISO,California Independent System Operator,America/Los_Angeles,5
+TVA,Tennessee Valley Authority,America/Chicago,5
+NYIS,New York Independent System Operator,America/New_York,5
+FPL,Florida Power & Light,America/New_York,4
+ISNE,ISO New England,America/New_York,5

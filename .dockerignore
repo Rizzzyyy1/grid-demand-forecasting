@@ -1,0 +1,13 @@
+.venv
+.git
+data
+reports/runs
+logs
+.dagster
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.hypothesis
+**/__pycache__
+transform/target
+transform/logs

@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: int_eia__demand_cleaned
+    description: >
+      One row per (BA, hour ending). Cleaning thresholds are the dbt vars outlier_low_ratio (0.5)
+      and outlier_high_ratio (1.6) applied to a centred 7-day rolling median of reported demand.
+      They are deliberately loose: they catch unit errors, zeros and telemetry spikes, not
+      genuine heat-wave peaks (which rarely exceed 1.4x the weekly median).
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, hour_ending_utc]}}
+    columns:
+      - name: demand_mw
+        description: Scoring target. Reported demand passing all rules; NULL hours are not scored.
+      - name: demand_filled_mw
+        description: For lag features only; falls back to EIA's adjusted (imputed) series.
+        tests:
+          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.99}}
+
+  - name: dq_cleaning_log
+    description: Rows affected by each cleaning rule per BA. Surfaced in reports/data_profile.md.
+    columns:
+      - name: ba_code
+        tests: [unique, not_null]
+
+  - name: int_weather__ba_hourly
+    description: Population-weighted BA weather from each BA's cities (forecast_d2 product).
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, valid_time_utc]}}
+    columns:
+      - name: n_cities
+        tests:
+          - accepted_range: {arguments: {min_value: 0, max_value: 6}}

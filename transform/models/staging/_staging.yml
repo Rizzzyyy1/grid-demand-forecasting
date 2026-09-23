@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_eia__balance
+    description: >
+      EIA-930 hourly balance data for the configured BAs, parsed from the six-month bulk CSVs.
+      Hours are labelled by their end ("hour ending"). Duplicates across files are kept here and
+      resolved in the intermediate layer.
+    columns:
+      - name: ba_code
+        tests: [not_null]
+      - name: hour_ending_utc
+        tests: [not_null]
+      - name: eia_hour_number
+        tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 1, max_value: 25}}
+
+  - name: stg_open_meteo__forecast_d2
+    description: City-level hourly weather forecasts as issued ~48 h before each valid hour.
+    columns:
+      - name: ba_code
+        tests: [not_null]
+      - name: city_slug
+        tests: [not_null]
+      - name: valid_time_utc
+        tests: [not_null]
+    tests:
+      - unique_combination: {arguments: {columns: [ba_code, city_slug, valid_time_utc]}}
