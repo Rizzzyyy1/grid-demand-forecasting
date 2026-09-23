@@ -38,10 +38,16 @@ models:
       - name: demand_mw
         tests:
           - accepted_range: {arguments: {min_value: 0, max_value: 250000}}
-          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.98}}
+          - min_coverage: {arguments: {group_by: ba_code, time_column: hour_ending_utc, min_share: 0.98}}
       - name: operator_forecast_mw
+        description: >
+          Benchmark only. EIA has upstream gaps (e.g. SWPP, 408 hours between 2026-07-08 and
+          2026-08-19), so low coverage warns rather than fails; live and backtest scoring compare
+          models only on hours where every forecast, including the operator's, exists.
         tests:
-          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.98}}
+          - min_coverage:
+              arguments: {group_by: ba_code, time_column: hour_ending_utc, min_share: 0.98}
+              config: {severity: warn}
 
   - name: fct_weather_forecast_hourly
     tests:

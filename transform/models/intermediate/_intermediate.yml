@@ -15,7 +15,7 @@ models:
       - name: demand_filled_mw
         description: For lag features only; falls back to EIA's adjusted (imputed) series.
         tests:
-          - min_coverage: {arguments: {group_by: ba_code, min_share: 0.99}}
+          - min_coverage: {arguments: {group_by: ba_code, time_column: hour_ending_utc, min_share: 0.99}}
 
   - name: dq_cleaning_log
     description: Rows affected by each cleaning rule per BA. Surfaced in reports/data_profile.md.
