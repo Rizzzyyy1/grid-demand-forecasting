@@ -27,7 +27,7 @@ defaults:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     outputs:
       site_built: ${{ steps.site.outcome == 'success' }}
@@ -115,7 +115,7 @@ jobs:
   deploy:
     needs: run
     if: always() && needs.run.outputs.site_built == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
