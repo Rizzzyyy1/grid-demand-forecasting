@@ -1,15 +1,15 @@
 {
-  "started_at": "2026-09-27T17:07:34.297829+00:00",
-  "finished_at": "2026-09-27T17:07:41.984648+00:00",
-  "ok": false,
+  "started_at": "2026-09-27T17:57:13.291589+00:00",
+  "finished_at": "2026-09-27T17:57:44.249594+00:00",
+  "ok": true,
   "code_version": "c0073c388562",
-  "model_version": null,
+  "model_version": "3",
   "target_day": "2026-09-28",
   "stages": [
     {
       "name": "eia",
       "ok": true,
-      "seconds": 0.33279143600000083,
+      "seconds": 3.281010000000002,
       "detail": {
         "files_checked": 1,
         "downloaded": 1,
@@ -20,23 +20,49 @@
     {
       "name": "weather",
       "ok": true,
-      "seconds": 0.5139364720000046,
+      "seconds": 17.81572753799999,
       "detail": {
-        "downloaded": 0,
+        "downloaded": 98,
         "skipped": 0,
-        "quota_stop": true,
-        "remaining": 98
+        "quota_stop": false,
+        "remaining": 0
       },
       "error": null
     },
     {
       "name": "build",
-      "ok": false,
-      "seconds": 6.830372087999997,
+      "ok": true,
+      "seconds": 6.968361384999994,
       "detail": {
-        "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/grid-demand-forecasting/grid-demand-forecasting/src/gridcast/live/daily.py\", line 93, in _stage\n    detail = fn()\n  File \"/home/runner/work/grid-demand-forecasting/grid-demand-forecasting/src/gridcast/live/daily.py\", line 183, in build\n    raise RuntimeError(\"dbt build failed: \" + \"; \".join(r.messages[:5]))\nRuntimeError: dbt build failed: \u001b[0m17:07:40  1 of 53 ERROR creating sql table model main.stg_open_meteo__forecast_d2 ........ [\u001b[31mERROR\u001b[0m in 0.19s]; \u001b[0m17:07:41  Done. PASS=38 WARN=1 ERROR=1 SKIP=13 NO-OP=0 TOTAL=53\n"
+        "passed": 52,
+        "failed": 0
       },
-      "error": "RuntimeError: dbt build failed: \u001b[0m17:07:40  1 of 53 ERROR creating sql table model main.stg_open_meteo__forecast_d2 ........ [\u001b[31mERROR\u001b[0m in 0.19s]; \u001b[0m17:07:41  Done. PASS=38 WARN=1 ERROR=1 SKIP=13 NO-OP=0 TOTAL=53"
+      "error": null
+    },
+    {
+      "name": "forecast",
+      "ok": true,
+      "seconds": 2.8051366170000023,
+      "detail": {
+        "target_day": "2026-09-28",
+        "rows": 240,
+        "late_rows": 240,
+        "null_forecasts": 0,
+        "skipped_existing": false,
+        "leak_checked_cells": 4540
+      },
+      "error": null
+    },
+    {
+      "name": "score",
+      "ok": true,
+      "seconds": 0.059401014000002306,
+      "detail": {
+        "leaderboard_rows": 20,
+        "daily_rows": 60,
+        "forecast_rows": 1200
+      },
+      "error": null
     }
   ]
 }
