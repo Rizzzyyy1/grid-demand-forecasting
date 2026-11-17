@@ -1,6 +1,6 @@
 {
-  "started_at": "2026-11-17T21:11:38.573069+00:00",
-  "finished_at": "2026-11-17T21:12:05.875175+00:00",
+  "started_at": "2026-11-17T21:54:51.941522+00:00",
+  "finished_at": "2026-11-17T21:55:19.046505+00:00",
   "ok": true,
   "code_version": "c0073c388562",
   "model_version": "3",
@@ -9,7 +9,7 @@
     {
       "name": "eia",
       "ok": true,
-      "seconds": 0.3571992829999999,
+      "seconds": 1.259038146999984,
       "detail": {
         "files_checked": 1,
         "downloaded": 1,
@@ -20,7 +20,7 @@
     {
       "name": "weather",
       "ok": true,
-      "seconds": 16.880101601000007,
+      "seconds": 18.430516615000016,
       "detail": {
         "downloaded": 98,
         "skipped": 0,
@@ -32,7 +32,7 @@
     {
       "name": "build",
       "ok": true,
-      "seconds": 6.956829895999988,
+      "seconds": 5.432614430000001,
       "detail": {
         "passed": 52,
         "failed": 0
@@ -42,21 +42,21 @@
     {
       "name": "forecast",
       "ok": true,
-      "seconds": 2.9284338840000146,
+      "seconds": 1.661696897000013,
       "detail": {
         "target_day": "2026-11-18",
-        "rows": 240,
-        "late_rows": 240,
+        "rows": 0,
+        "late_rows": 0,
         "null_forecasts": 0,
-        "skipped_existing": false,
-        "leak_checked_cells": 4495
+        "skipped_existing": true,
+        "leak_checked_cells": 0
       },
       "error": null
     },
     {
       "name": "score",
       "ok": true,
-      "seconds": 0.1238447469999926,
+      "seconds": 0.2853444219999801,
       "detail": {
         "leaderboard_rows": 20,
         "daily_rows": 1070,
